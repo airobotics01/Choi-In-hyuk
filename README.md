@@ -1,4 +1,5 @@
-![left to right](https://github.com/user-attachments/assets/c0f1880e-2a63-4087-9549-ad2186fcb133)[진행한 내용]
+![left to right](https://github.com/user-attachments/assets/c0f1880e-2a63-4087-9549-ad2186fcb133)
+[진행한 내용]
 streamlit을 이용해서 웹에서 원하는 동작을 말하면 json파일에서 해당코드를 읽고 rivz에서 프랑카 로봇이 움직이도록 해보았습니다.
 
 [메인 코드]
@@ -102,5 +103,28 @@ if user_request:
             st.error("No matching example found. Please refine your request.")
 
 ```
-
-
+[JSON파일]
+```python
+[
+    {
+        "title": "Move to Ready Position",
+        "description": "Move the Franka robot arm to its ready position.",
+        "code": "from moveit_commander import MoveGroupCommander\n\ndef move_to_ready():\n    group = MoveGroupCommander('panda_arm')\n    group.set_named_target('ready')\n    success, plan = group.plan() if isinstance(group.plan(), tuple) else (True, group.plan())\n    if not success or not plan:\n        print('Planning failed!')\n        return\n    group.execute(plan, wait=True)\n    group.stop()\n    group.clear_pose_targets()\n    print('Moved robot arm to ready position.')\n\nmove_to_ready()"
+    },
+    {
+        "title": "Pick Object",
+        "description": "Move the Franka robot arm to a predefined picking position and close the gripper.",
+        "code": "from moveit_commander import MoveGroupCommander\n\ndef pick_object():\n    group = MoveGroupCommander('panda_arm')\n    pose_target = group.get_current_pose().pose\n    pose_target.position.x = 0.4\n    pose_target.position.y = 0.0\n    pose_target.position.z = 0.2\n    group.set_pose_target(pose_target)\n    success, plan = group.plan() if isinstance(group.plan(), tuple) else (True, group.plan())\n    if not success or not plan:\n        print('Planning failed!')\n        return\n    group.execute(plan, wait=True)\n    print('Closing gripper...')\n    print('Object picked!')\n    group.stop()\n    group.clear_pose_targets()\n\npick_object()"
+    },
+    {
+        "title": "Move Object Left to Right",
+        "description": "Pick an object from the left and place it to the right.",
+        "code": "from moveit_commander import MoveGroupCommander\n\ndef move_left_to_right():\n    group = MoveGroupCommander('panda_arm')\n    group.set_named_target('ready')\n    plan = group.plan()\n    if isinstance(plan, tuple):\n        plan = plan[1] if plan[0] else None\n    if not plan:\n        print('Planning to ready position failed!')\n        return\n    group.execute(plan, wait=True)\n    pose_target = group.get_current_pose().pose\n    pose_target.position.x = 0.3\n    pose_target.position.y = 0.2\n    pose_target.position.z = 0.2\n    group.set_pose_target(pose_target)\n    plan = group.plan()\n    if isinstance(plan, tuple):\n        plan = plan[1] if plan[0] else None\n    if not plan:\n        print('Planning to pick position failed!')\n        return\n    group.execute(plan, wait=True)\n    print('Closing gripper...')\n    pose_target.position.y = -0.2\n    group.set_pose_target(pose_target)\n    plan = group.plan()\n    if isinstance(plan, tuple):\n        plan = plan[1] if plan[0] else None\n    if not plan:\n        print('Planning to place position failed!')\n        return\n    group.execute(plan, wait=True)\n    print('Opening gripper...')\n    print('Object placed to the right!')\n    group.stop()\n    group.clear_pose_targets()\n\nmove_left_to_right()"
+    },
+    {
+        "title": "Move Object Right to Left",
+        "description": "Pick an object from the right and place it to the left.",
+        "code": "from moveit_commander import MoveGroupCommander\n\ndef move_right_to_left():\n    group = MoveGroupCommander('panda_arm')\n    group.set_named_target('ready')\n    plan = group.plan()\n    if isinstance(plan, tuple):\n        plan = plan[1] if plan[0] else None\n    if not plan:\n        print('Planning to ready position failed!')\n        return\n    group.execute(plan, wait=True)\n    pose_target = group.get_current_pose().pose\n    pose_target.position.x = 0.3\n    pose_target.position.y = -0.2\n    pose_target.position.z = 0.2\n    group.set_pose_target(pose_target)\n    plan = group.plan()\n    if isinstance(plan, tuple):\n        plan = plan[1] if plan[0] else None\n    if not plan:\n        print('Planning to pick position failed!')\n        return\n    group.execute(plan, wait=True)\n    print('Closing gripper...')\n    pose_target.position.y = 0.2\n    group.set_pose_target(pose_target)\n    plan = group.plan()\n    if isinstance(plan, tuple):\n        plan = plan[1] if plan[0] else None\n    if not plan:\n        print('Planning to place position failed!')\n        return\n    group.execute(plan, wait=True)\n    print('Opening gripper...')\n    print('Object placed to the left!')\n    group.stop()\n    group.clear_pose_targets()\n\nmove_right_to_left()"
+    }
+]
+```
