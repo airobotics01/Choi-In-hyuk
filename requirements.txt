@@ -1,0 +1,14 @@
+langchain
+langchain-openai
+langchain-community
+langgraph
+streamlit
+pydantic
+tiktoken
+openai
+networkx
+numpy
+pandas
+matplotlib
+faiss-cpu
+chromadb 
